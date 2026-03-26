@@ -152,28 +152,25 @@ def extract_excel_data(filepath, header_row_count=1):
 # ==============================================================================
 def raw_pdf_to_json(page_text):
     """Meminta bantuan LLM untuk merakit teks vertikal PDF menjadi Array JSON terstruktur."""
+    from openai import OpenAI
+    import os, json
     
-    # 🌟 FIX: BACA KREDENSIAL DARI NOTEBOOK SECARA REAL-TIME 🌟
     api_key = os.environ.get("DEEPSEEK_API_KEY")
-    base_url = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+    base_url = os.environ.get("DEEPSEEK_BASE_URL", "[https://api.deepseek.com](https://api.deepseek.com)")
     model_name = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
     
-    if not api_key:
-        print("⚠️ API Key tidak ditemukan. Gagal parsing PDF.")
-        return []
-        
-    # Inisialisasi client API di dalam fungsi agar fresh
+    if not api_key: return []
     local_client = OpenAI(api_key=api_key, base_url=base_url)
 
     system_prompt = """You are a highly precise data parsing assistant.
 The following is vertically extracted text from a Corporate Risk Register PDF.
 Groups of values reading down the page represent columns.
 Output exactly and ONLY a valid JSON array of objects representing these risks.
-Keys to extract: Reference, Risk and effects, Mitigation, Risk Owner, Actions being taken, Comments.
+Keys to extract: Reference, Risk and effects, Mitigation, Risk Owner, Actions being taken.
 Do not wrap your response in markdown fences."""
     try:
         response = local_client.chat.completions.create(
-            model=model_name, # 🌟 SEKARANG PAKAI MODEL KOBOILLM
+            model=model_name,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"--- PAGE TEXT ---\n{page_text}"}
@@ -185,10 +182,8 @@ Do not wrap your response in markdown fences."""
         if res.startswith("```"): res = res[3:]
         if res.endswith("```"): res = res[:-3]
         return json.loads(res.strip())
-    except Exception as e:
-        print(f"❌ Error parsing PDF dengan LLM: {e}")
-        return []
-        
+    except Exception: return []
+
 
 def split_risk_effects(df):
     """

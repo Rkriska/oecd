@@ -1,0 +1,4 @@
+Document,Rows,Text Cosine (%),Exact Match (%),Numeric MAE,Overall Score (%)
+Dokumen 1 (IVC DOE R2),33,46.19,36.8,3.1797,49.34
+Dokumen 2 (City of York),45,81.56,79.56,,85.67
+Dokumen 3 (Digital IT),3,80.0,80.0,,85.0
